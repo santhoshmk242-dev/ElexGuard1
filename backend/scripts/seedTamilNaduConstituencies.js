@@ -1,0 +1,296 @@
+
+'use strict';
+
+// Adds 234 Tamil Nadu Assembly Constituencies.
+// Does not delete existing users, voters, elections or other records.
+
+const { connectDB, mongoose } = require('../config/db');
+const Constituency = require('../models/Constituency');
+
+const names = [
+'Gummidipoondi',
+'Ponneri (SC)',
+'Tiruttani',
+'Thiruvallur',
+'Poonamallee (SC)',
+'Avadi',
+'Maduravoyal',
+'Ambattur',
+'Madavaram',
+'Tiruvottiyur',
+'Dr.Radhakrishnan Nagar',
+'Perambur',
+'Kolathur',
+'Villivakkam',
+'Thiru-Vi-Ka-Nagar (SC)',
+'Egmore (SC)',
+'Royapuram',
+'Harbour',
+'Chepauk-Thiruvallikeni',
+'Thousand Lights',
+'Anna Nagar',
+'Virugampakkam',
+'Saidapet',
+'Thiyagarayanagar',
+'Mylapore',
+'Velachery',
+'Shozhinganallur',
+'Alandur',
+'Sriperumbudur (SC)',
+'Pallavaram',
+'Tambaram',
+'Chengalpattu',
+'Thiruporur',
+'Cheyyur (SC)',
+'Madurantakam (SC)',
+'Uthiramerur',
+'Kancheepuram',
+'Arakkonam (SC)',
+'Sholingur',
+'Katpadi',
+'Ranipet',
+'Arcot',
+'Vellore',
+'Anaikattu',
+'Kilvaithinankuppam (SC)',
+'Gudiyattam (SC)',
+'Vaniyambadi',
+'Ambur',
+'Jolarpet',
+'Tirupattur',
+'Uthangarai (SC)',
+'Bargur',
+'Krishnagiri',
+'Veppanahalli',
+'Hosur',
+'Thalli',
+'Palacodu',
+'Pennagaram',
+'Dharmapuri',
+'Pappireddippatti',
+'Harur (SC)',
+'Chengam (SC)',
+'Tiruvannamalai',
+'Kilpennathur',
+'Kalasapakkam',
+'Polur',
+'Arani',
+'Cheyyar',
+'Vandavasi (SC)',
+'Gingee',
+'Mailam',
+'Tindivanam (SC)',
+'Vanur (SC)',
+'Viluppuram',
+'Vikravandi',
+'Tirukkoyilur',
+'Ulundurpettai',
+'Rishivandiyam',
+'Sankarapuram',
+'Kallakurichi (SC)',
+'Gangavalli (SC)',
+'Attur (SC)',
+'Yercaud (ST)',
+'Omalur',
+'Mettur',
+'Edappadi',
+'Sankari',
+'Salem (West)',
+'Salem (North)',
+'Salem (South)',
+'Veerapandi',
+'Rasipuram (SC)',
+'Senthamangalam (ST)',
+'Namakkal',
+'Paramathi-Velur',
+'Tiruchengodu',
+'Kumarapalayam',
+'Erode (East)',
+'Erode (West)',
+'Modakkurichi',
+'Dharapuram (SC)',
+'Kangayam',
+'Perundurai',
+'Bhavani',
+'Anthiyur',
+'Gobichettipalayam',
+'Bhavanisagar (SC)',
+'Udhagamandalam',
+'Gudalur (SC)',
+'Coonoor',
+'Mettuppalayam',
+'Avanashi (SC)',
+'Tiruppur (North)',
+'Tiruppur (South)',
+'Palladam',
+'Sulur',
+'Kavundampalayam',
+'Coimbatore (North)',
+'Thondamuthur',
+'Coimbatore (South)',
+'Singanallur',
+'Kinathukadavu',
+'Pollachi',
+'Valparai (SC)',
+'Udumalaipettai',
+'Madathukulam',
+'Palani',
+'Oddanchatram',
+'Athoor',
+'Nilakkottai (SC)',
+'Natham',
+'Dindigul',
+'Vedasandur',
+'Aravakurichi',
+'Karur',
+'Krishnarayapuram (SC)',
+'Kulithalai',
+'Manapparai',
+'Srirangam',
+'Tiruchirappalli (West)',
+'Tiruchirappalli (East)',
+'Thiruverumbur',
+'Lalgudi',
+'Manachanallur',
+'Musiri',
+'Thuraiyur (SC)',
+'Perambalur (SC)',
+'Kunnam',
+'Ariyalur',
+'Jayankondam',
+'Tittakudi (SC)',
+'Vriddhachalam',
+'Neyveli',
+'Panruti',
+'Cuddalore',
+'Kurinjipadi',
+'Bhuvanagiri',
+'Chidambaram',
+'Kattumannarkoil (SC)',
+'Sirkazhi (SC)',
+'Mayiladuthurai',
+'Poompuhar',
+'Nagapattinam',
+'Kilvelur (SC)',
+'Vedaranyam',
+'Thiruthuraipoondi (SC)',
+'Mannargudi',
+'Thiruvarur',
+'Nannilam',
+'Thiruvidaimarudur (SC)',
+'Kumbakonam',
+'Papanasam',
+'Thiruvaiyaru',
+'Thanjavur',
+'Orathanadu',
+'Pattukkottai',
+'Peravurani',
+'Gandharvakottai (SC)',
+'Viralimalai',
+'Pudukkottai',
+'Thirumayam',
+'Alangudi',
+'Aranthangi',
+'Karaikudi',
+'Tiruppattur',
+'Sivaganga',
+'Manamadurai (SC)',
+'Melur',
+'Madurai East',
+'Sholavandan (SC)',
+'Madurai North',
+'Madurai South',
+'Madurai Central',
+'Madurai West',
+'Thiruparankundram',
+'Thirumangalam',
+'Usilampatti',
+'Andipatti',
+'Periyakulam (SC)',
+'Bodinayakanur',
+'Cumbum',
+'Rajapalayam',
+'Srivilliputhur (SC)',
+'Sattur',
+'Sivakasi',
+'Virudhunagar',
+'Aruppukkottai',
+'Tiruchuli',
+'Paramakudi (SC)',
+'Tiruvadanai',
+'Ramanathapuram',
+'Mudhukulathur',
+'Vilathikulam',
+'Thoothukkudi',
+'Tiruchendur',
+'Srivaikuntam',
+'Ottapidaram (SC)',
+'Kovilpatti',
+'Sankarankovil (SC)',
+'Vasudevanallur (SC)',
+'Kadayanallur',
+'Tenkasi',
+'Alangulam',
+'Tirunelveli',
+'Ambasamudram',
+'Palayamkottai',
+'Nanguneri',
+'Radhapuram',
+'Kanniyakumari',
+'Nagercoil',
+'Colachel',
+'Padmanabhapuram',
+'Vilavancode',
+'Killiyoor'
+];
+
+async function main() {
+  if (names.length !== 234) {
+    throw new Error(`Expected 234 names, found ${names.length}`);
+  }
+
+  await connectDB();
+
+  const operations = names.map((name, index) => {
+    const number = index + 1;
+    const code = `TN-${String(number).padStart(3, '0')}`;
+
+    return {
+      updateOne: {
+        filter: { code },
+        update: {
+          $set: {
+            name,
+            code,
+            region: 'Tamil Nadu',
+            description: `Tamil Nadu Assembly Constituency No. ${number}`
+          }
+        },
+        upsert: true
+      }
+    };
+  });
+
+  const result = await Constituency.bulkWrite(operations);
+
+  const total = await Constituency.countDocuments({
+    code: /^TN-\d{3}$/
+  });
+
+  console.log('Inserted:', result.upsertedCount);
+  console.log('Updated:', result.modifiedCount);
+  console.log(`Tamil Nadu constituencies verified: ${total}/234`);
+
+  if (total !== 234) {
+    throw new Error(`Expected 234 records, found ${total}`);
+  }
+}
+
+main()
+  .catch(error => {
+    console.error('Constituency seed failed:', error.message);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await mongoose.disconnect();
+  });
